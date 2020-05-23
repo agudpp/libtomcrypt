@@ -1,0 +1,63 @@
+# MAKEFILE for linux GCC
+#
+# This makefile produces a shared object and requires libtool to be installed.
+#
+# Thanks to Zed Shaw for helping debug this on BSD/OSX.
+# Tom St Denis
+#
+#  (GNU make only)
+
+### USAGE:
+#
+# CFLAGS="-DUSE_LTM -DLTM_DESC -I/path/to/libtommath" make -f makefile.shared all EXTRALIBS=/path/to/libtommath/libtommath.a
+# ./test
+# make -f makefile.shared PREFIX=/opt/libtom install
+#
+
+PLATFORM := $(shell uname | sed -e 's/_.*//')
+
+ifeq ($(PLATFORM), CYGWIN)
+  NO_UNDEFINED:=-no-undefined
+endif
+
+FLAGS        += # -std=gnu99 -Iinclude
+CFLAGS       += -fPIC -g #-pedantic -Wall -Wextra -ggdb3
+LDFLAGS      += -shared
+
+INSTALL_CMD = $(TGTLIBTOOL) --mode=install install
+UNINSTALL_CMD = $(TGTLIBTOOL) --mode=uninstall rm
+
+#Output filenames for various targets.
+ifndef LIBNAME
+   LIBNAME=libtomcrypt.so
+endif
+
+
+include makefile_include.mk
+
+
+#ciphers come in two flavours... enc+dec and enc
+src/ciphers/aes/aes_enc.o: src/ciphers/aes/aes.c src/ciphers/aes/aes_tab.c
+  $(CC) $(LTC_CFLAGS) $(LTC_CFLAGS) $(CPPFLAGS) $(LTC_LDFLAGS) -DENCRYPT_ONLY -c src/ciphers/aes/aes.c -o src/ciphers/aes/aes_enc.o
+
+.c.o:
+  $(CC) $(LTC_CFLAGS) $(LTM_CFLAGS) $(CFLAGS) $(LTM_LDFLAGS) -o $@ -c $<
+
+#LOBJECTS = $(OBJECTS:.o=.lo)
+
+$(LIBNAME): $(OBJECTS)
+  $(CC) $(FLAGS) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(EXTRALIBS) -o $(LIBNAME) $(OBJECTS)
+
+
+install: $(call print-help,install,Installs the library + headers + pkg-config file) .common_install
+  sed -e 's,^prefix=.*,prefix=$(PREFIX),' -e 's,^Version:.*,Version: $(VERSION_PC),' libtomcrypt.pc.in > libtomcrypt.pc
+  install -p -d $(DESTDIR)$(LIBPATH)/pkgconfig
+  install -p -m 644 libtomcrypt.pc $(DESTDIR)$(LIBPATH)/pkgconfig/
+
+
+uninstall: $(call print-help,uninstall,Uninstalls the library + headers + pkg-config file) .common_uninstall
+  rm $(DESTDIR)$(LIBPATH)/pkgconfig/libtomcrypt.pc
+
+# ref:         $Format:%D$
+# git commit:  $Format:%H$
+# commit time: $Format:%ai$
