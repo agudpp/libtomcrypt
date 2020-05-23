@@ -46,7 +46,7 @@ src/ciphers/aes/aes_enc.o: src/ciphers/aes/aes.c src/ciphers/aes/aes_tab.c
 #LOBJECTS = $(OBJECTS:.o=.lo)
 
 $(LIBNAME): $(OBJECTS)
-	$(CC) $(FLAGS) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(EXTRALIBS) -o $(LIBNAME) $(OBJECTS)
+	$(CC) $(FLAGS) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(EXTRALIBS) -Wl,-soname,$(LIBNAME) -o $(LIBNAME) $(OBJECTS)
 
 
 install: $(call print-help,install,Installs the library + headers + pkg-config file) .common_install
