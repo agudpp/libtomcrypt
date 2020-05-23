@@ -5,7 +5,7 @@
 # Thanks to Zed Shaw for helping debug this on BSD/OSX.
 # Tom St Denis
 #
-#  (GNU make only)
+#	(GNU make only)
 
 ### USAGE:
 #
@@ -17,19 +17,19 @@
 PLATFORM := $(shell uname | sed -e 's/_.*//')
 
 ifeq ($(PLATFORM), CYGWIN)
-  NO_UNDEFINED:=-no-undefined
+	NO_UNDEFINED:=-no-undefined
 endif
 
-FLAGS        += # -std=gnu99 -Iinclude
-CFLAGS       += -fPIC -g #-pedantic -Wall -Wextra -ggdb3
-LDFLAGS      += -shared
+FLAGS				+= # -std=gnu99 -Iinclude
+CFLAGS			 += -fPIC -g #-pedantic -Wall -Wextra -ggdb3
+LDFLAGS			+= -shared
 
 INSTALL_CMD = $(TGTLIBTOOL) --mode=install install
 UNINSTALL_CMD = $(TGTLIBTOOL) --mode=uninstall rm
 
 #Output filenames for various targets.
 ifndef LIBNAME
-   LIBNAME=libtomcrypt.so
+	 LIBNAME=libtomcrypt.so
 endif
 
 
@@ -38,26 +38,26 @@ include makefile_include.mk
 
 #ciphers come in two flavours... enc+dec and enc
 src/ciphers/aes/aes_enc.o: src/ciphers/aes/aes.c src/ciphers/aes/aes_tab.c
-  $(CC) $(LTC_CFLAGS) $(LTC_CFLAGS) $(CPPFLAGS) $(LTC_LDFLAGS) -DENCRYPT_ONLY -c src/ciphers/aes/aes.c -o src/ciphers/aes/aes_enc.o
+	$(CC) $(LTC_CFLAGS) $(LTC_CFLAGS) $(CPPFLAGS) $(LTC_LDFLAGS) -DENCRYPT_ONLY -c src/ciphers/aes/aes.c -o src/ciphers/aes/aes_enc.o
 
 .c.o:
-  $(CC) $(LTC_CFLAGS) $(LTM_CFLAGS) $(CFLAGS) $(LTM_LDFLAGS) -o $@ -c $<
+	$(CC) $(LTC_CFLAGS) $(LTM_CFLAGS) $(CFLAGS) $(LTM_LDFLAGS) -o $@ -c $<
 
 #LOBJECTS = $(OBJECTS:.o=.lo)
 
 $(LIBNAME): $(OBJECTS)
-  $(CC) $(FLAGS) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(EXTRALIBS) -o $(LIBNAME) $(OBJECTS)
+	$(CC) $(FLAGS) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) $(EXTRALIBS) -o $(LIBNAME) $(OBJECTS)
 
 
 install: $(call print-help,install,Installs the library + headers + pkg-config file) .common_install
-  sed -e 's,^prefix=.*,prefix=$(PREFIX),' -e 's,^Version:.*,Version: $(VERSION_PC),' libtomcrypt.pc.in > libtomcrypt.pc
-  install -p -d $(DESTDIR)$(LIBPATH)/pkgconfig
-  install -p -m 644 libtomcrypt.pc $(DESTDIR)$(LIBPATH)/pkgconfig/
+	sed -e 's,^prefix=.*,prefix=$(PREFIX),' -e 's,^Version:.*,Version: $(VERSION_PC),' libtomcrypt.pc.in > libtomcrypt.pc
+	install -p -d $(DESTDIR)$(LIBPATH)/pkgconfig
+	install -p -m 644 libtomcrypt.pc $(DESTDIR)$(LIBPATH)/pkgconfig/
 
 
 uninstall: $(call print-help,uninstall,Uninstalls the library + headers + pkg-config file) .common_uninstall
-  rm $(DESTDIR)$(LIBPATH)/pkgconfig/libtomcrypt.pc
+	rm $(DESTDIR)$(LIBPATH)/pkgconfig/libtomcrypt.pc
 
-# ref:         $Format:%D$
-# git commit:  $Format:%H$
+# ref:				 $Format:%D$
+# git commit:	$Format:%H$
 # commit time: $Format:%ai$
